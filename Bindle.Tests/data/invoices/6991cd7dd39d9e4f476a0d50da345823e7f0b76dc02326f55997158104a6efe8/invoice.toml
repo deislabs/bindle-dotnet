@@ -1,0 +1,26 @@
+bindleVersion = "1.0.0"
+
+[bindle]
+name = "my/fancy/bindle"
+version = "0.3.0"
+
+[[group]]
+name = "server"
+satisfiedBy = "allOf"
+
+[[group]]
+name = "cli"
+satisfiedBy = "oneOf"
+required = true
+
+[[group]]
+name = "utility"
+satisfiedBy = "optional"
+
+[[parcel]]
+label.sha256 = "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6"
+label.mediaType = "text/plain"
+label.name = "gary"
+label.size = 15
+conditions.memberOf = ["server"]
+conditions.requires = ["utility"]
