@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -38,6 +39,60 @@ namespace Bindle.Tests
             Assert.Equal("1.0.0", invoice.BindleVersion);
             Assert.Equal("yourbindle", invoice.Bindle.Name);
             Assert.Equal(3, invoice.Parcels.Count);
+        }
+
+        [Fact]
+        public async Task CanCreateInvoices()
+        {
+            // TODO: this results in creating the invoice, so it can't be run twice!
+            // For now you need to delete test/data/invoices/8fb420... and restart the Bindle server
+            var client = new BindleClient(DEMO_SERVER_URL);
+            var invoice = new Invoice(
+                bindleVersion: "1.0.0",
+                yanked: false,
+                bindle: new BindleMetadata(
+                    name: "bernards/abominable/bindle",
+                    version: "0.0.1",
+                    description: "an abominable bindle",
+                    authors: new [] { "some chap named Bernard" }
+                ),
+                annotations: new Dictionary<string, string> {
+                    { "penguinType", "adelie" }
+                },
+                parcels: new [] {
+                    new Parcel(
+                        label: new Label(
+                            name: "gary",
+                            sha256: "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6",
+                            mediaType: "text/plain",
+                            size: 15,
+                            annotations: new Dictionary<string, string>(),
+                            feature: new Dictionary<string, IDictionary<string, string>>()
+                        ),
+                        conditions: null
+                    ),
+                    new Parcel(
+                        label: new Label(
+                            name: "keith",
+                            sha256: "45678",
+                            mediaType: "text/plain",
+                            size: 20,
+                            annotations: new Dictionary<string, string>(),
+                            feature: new Dictionary<string, IDictionary<string, string>>()
+                        ),
+                        conditions: null
+                    ),
+                },
+                groups: new [] {
+                    new Group(name: "group1", required: true, satisfiedBy: SatisfiedBy.AllOf)
+                }
+            );
+            var createResult = await client.CreateInvoice(invoice);
+            Assert.Equal(1, createResult.missingParcels.length);
+            var fetched = await client.GetInvoice("bernards/abominable/bindle/0.0.1");
+            Assert.Equal(invoice.Annotations["penguinType"], fetched.Annotations["penguinType"]);
+            Assert.Equal(invoice.Parcels.Count, fetched.Parcels.Count);
+            Assert.Equal(invoice.Groups.Count, fetched.Groups.Count);
         }
     }
 }
