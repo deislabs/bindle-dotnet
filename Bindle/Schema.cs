@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Tomlyn.Model;
 
 namespace Bindle
 {
@@ -21,9 +22,9 @@ namespace Bindle
             BindleVersion = bindleVersion;
             Yanked = yanked;
             Bindle = bindle;
-            Annotations = new Dictionary<string, string>(annotations);
-            Parcels = new List<Parcel>(parcels).AsReadOnly();
-            Groups = new List<Group>(groups).AsReadOnly();
+            Annotations = DefensiveCopy.Create(annotations);
+            Parcels = DefensiveCopy.Create(parcels);
+            Groups = DefensiveCopy.Create(groups);
         }
 
         public string BindleVersion { get; }
@@ -36,19 +37,104 @@ namespace Bindle
 
     public class BindleMetadata
     {
-        public string Name { get; init; }
-        public string Version { get; init; }
-        public string? Description { get; init; }
-        public IReadOnlyList<string> Authors { get; init; }
+        internal BindleMetadata(
+            string name,
+            string version,
+            string? description,
+            IEnumerable<string> authors
+        )
+        {
+            Name = name;
+            Version = version;
+            Description = description;
+            Authors = DefensiveCopy.Create(authors);
+        }
+
+        public string Name { get; }
+        public string Version { get; }
+        public string? Description { get; }
+        public IReadOnlyList<string> Authors { get; }
     }
 
     public class Parcel
     {
+        public Parcel(
+            Label label,
+            Conditions? conditions
+        )
+        {
+            Label = label;
+            Conditions = conditions;
+        }
 
+        public Label Label { get; }
+        public Conditions? Conditions { get; }
+    }
+
+    public class Label
+    {
+        internal Label(
+            string name,
+            string sha256,
+            string mediaType,
+            long size,
+            IDictionary<string, string> annotations,
+            IDictionary<string, IDictionary<string, string>> feature
+        )
+        {
+            Name = name;
+            Sha256 = sha256;
+            MediaType = mediaType;
+            Size = size;
+            Annotations = DefensiveCopy.Create(annotations);
+            Feature = DefensiveCopy.Create(feature);
+        }
+
+        public string Name { get; }
+        public string Sha256 { get; }
+        public string MediaType { get; }
+        public long Size { get; }
+        public IReadOnlyDictionary<string, string> Annotations { get; }
+        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> Feature { get; }
+    }
+
+    public class Conditions
+    {
+        internal Conditions(
+            IEnumerable<string> memberOf,
+            IEnumerable<string> requires
+        )
+        {
+            MemberOf = DefensiveCopy.Create(memberOf);
+            Requires = DefensiveCopy.Create(requires);
+        }
+
+        public IReadOnlyList<string> MemberOf { get; }
+        public IReadOnlyList<string> Requires { get; }
     }
 
     public class Group
     {
+        internal Group(
+            string name,
+            bool required,
+            SatisfiedBy satisfiedBy
+        )
+        {
+            Name = name;
+            Required = required;
+            SatisfiedBy = satisfiedBy;
+        }
 
+        public string Name { get; }
+        public bool Required { get; }
+        public SatisfiedBy SatisfiedBy { get; }
+    }
+
+    public enum SatisfiedBy
+    {
+        AllOf,
+        OneOf,
+        Optional,
     }
 }
