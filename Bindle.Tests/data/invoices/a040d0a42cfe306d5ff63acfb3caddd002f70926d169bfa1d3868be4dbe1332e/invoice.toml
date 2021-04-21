@@ -1,0 +1,30 @@
+bindleVersion = "1.0.0"
+
+[bindle]
+name = "mybindle"
+version = "0.1.0"
+authors = ["Matt Butcher <matt.butcher@microsoft.com>"]
+description = "My first bindle"
+
+[annotations]
+myname = "myvalue"
+
+[[parcel]]
+
+[parcel.label]
+sha256 = "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6"
+mediaType = "text/plain"
+name = "curse.txt"
+size = 15
+
+# Experimental support for conditional inclusions
+[parcel.conditions]
+memberOf = ["server"]
+
+[[parcel]]
+
+[parcel.label]
+sha256 = "460d5965e4d1909e8c7a3748a414956b7038ab5fd79937c9fcb2b214e6b0160a"
+mediaType = "text/plain"
+name = "front.txt"
+size = 18
