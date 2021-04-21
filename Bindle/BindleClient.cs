@@ -16,13 +16,14 @@ namespace Bindle
             _baseUri = new Uri(SlashSafe(baseUri));
         }
 
+        private const string INVOICE_PATH = "_i/";
         private readonly Uri _baseUri;
 
         public async Task<Invoice> GetInvoice(string invoiceId, GetInvoiceOptions options = GetInvoiceOptions.None)
         {
             var query = GetInvoiceQueryString(options);
             var httpClient = new HttpClient();
-            var uri = new Uri(_baseUri, "_i/" + invoiceId + query);
+            var uri = new Uri(_baseUri, INVOICE_PATH + invoiceId + query);
             var response = await httpClient.GetAsync(uri);
             if (response == null)
             {
@@ -34,6 +35,21 @@ namespace Bindle
             }
             var toml = await ReadResponseToml(response);
             return Parser.ParseInvoice(toml);
+        }
+
+        public async Task<CreateInvoiceResult> CreateInvoice(Invoice invoice)
+        {
+            TomlTable invoiceModel = TomliseInvoice(invoice);
+            var invoiceToml = invoiceModel.ToString();
+
+            if (invoiceToml == null) {
+                throw new Exception("Error serialising invoice to TOML");
+            }
+
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Content-Type", "application/toml");
+            var uri = new Uri(_baseUri, INVOICE_PATH);
+            var response = await httpClient.PostAsync(uri, new StringContent(invoiceToml));
         }
 
         private static string SlashSafe(string uri)

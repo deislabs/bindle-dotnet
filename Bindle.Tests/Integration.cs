@@ -54,12 +54,12 @@ namespace Bindle.Tests
                     name: "bernards/abominable/bindle",
                     version: "0.0.1",
                     description: "an abominable bindle",
-                    authors: new [] { "some chap named Bernard" }
+                    authors: new[] { "some chap named Bernard" }
                 ),
                 annotations: new Dictionary<string, string> {
                     { "penguinType", "adelie" }
                 },
-                parcels: new [] {
+                parcels: new[] {
                     new Parcel(
                         label: new Label(
                             name: "gary",
@@ -83,7 +83,7 @@ namespace Bindle.Tests
                         conditions: null
                     ),
                 },
-                groups: new [] {
+                groups: new[] {
                     new Group(name: "group1", required: true, satisfiedBy: SatisfiedBy.AllOf)
                 }
             );
