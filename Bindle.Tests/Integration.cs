@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
+using static Bindle.GetInvoiceOptions;
+
 namespace Bindle.Tests
 {
     // To run this against the data assumed in the integration tests, run the Bindle server
@@ -26,6 +28,16 @@ namespace Bindle.Tests
             Assert.Equal("daemon", invoice.Parcels[0].Label.Name);
             Assert.Equal(3, invoice.Groups.Count);
             Assert.Equal("server", invoice.Groups[0].Name);
+        }
+
+        [Fact]
+        public async Task CanFetchYankedInvoices()
+        {
+            var client = new BindleClient(DEMO_SERVER_URL);
+            var invoice = await client.GetInvoice("yourbindle/0.1.1", IncludeYanked);
+            Assert.Equal("1.0.0", invoice.BindleVersion);
+            Assert.Equal("yourbindle", invoice.Bindle.Name);
+            Assert.Equal(3, invoice.Parcels.Count);
         }
     }
 }
