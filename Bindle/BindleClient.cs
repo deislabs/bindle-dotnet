@@ -18,10 +18,11 @@ namespace Bindle
 
         private readonly Uri _baseUri;
 
-        public async Task<Invoice> GetInvoice(string invoiceId)
+        public async Task<Invoice> GetInvoice(string invoiceId, GetInvoiceOptions options = GetInvoiceOptions.None)
         {
+            var query = GetInvoiceQueryString(options);
             var httpClient = new HttpClient();
-            var uri = new Uri(_baseUri, "_i/" + invoiceId);
+            var uri = new Uri(_baseUri, "_i/" + invoiceId + query);
             var response = await httpClient.GetAsync(uri);
             if (response == null)
             {
@@ -44,7 +45,8 @@ namespace Bindle
             return uri + '/';
         }
 
-        private async static Task<TomlTable> ReadResponseToml(HttpResponseMessage response) {
+        private async static Task<TomlTable> ReadResponseToml(HttpResponseMessage response)
+        {
             var responseText = await response.Content.ReadAsStringAsync();
             var responseToml = Tomlyn.Toml.Parse(responseText);
             if (responseToml == null)
@@ -57,6 +59,15 @@ namespace Bindle
                 throw new Exception($"Invalid response from Bindle server: {errors}");
             }
             return Tomlyn.Toml.ToModel(responseToml);
+        }
+
+        private static string GetInvoiceQueryString(GetInvoiceOptions options)
+        {
+            if ((options & GetInvoiceOptions.IncludeYanked) == GetInvoiceOptions.IncludeYanked)
+            {
+                return "?yanked=true";
+            }
+            return String.Empty;
         }
     }
 }

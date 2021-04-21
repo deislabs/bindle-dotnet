@@ -66,7 +66,7 @@ namespace Bindle
         internal static Parcel ParseParcel(TomlTable toml)
         {
             var label = ParseLabel(toml.GetTomlTable("label"));
-            var conditions = ParseConditions(toml.GetTomlTable("conditions"));
+            var conditions = ParseConditions(toml.TryGetTomlTable("conditions"));
             return new Parcel(label, conditions);
         }
 
