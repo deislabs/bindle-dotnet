@@ -137,4 +137,19 @@ namespace Bindle
         OneOf,
         Optional,
     }
+
+    public struct CreateInvoiceResult
+    {
+        internal CreateInvoiceResult(
+            Invoice invoice,
+            IEnumerable<Label> missingParcels
+        )
+        {
+            Invoice = invoice;
+            MissingParcels = DefensiveCopy.Create(missingParcels);
+        }
+
+        public Invoice Invoice { get; }
+        public IReadOnlyList<Label> MissingParcels { get; }
+    }
 }

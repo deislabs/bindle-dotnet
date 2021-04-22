@@ -11,7 +11,7 @@ namespace Bindle.Tests
     // to serve files on port 14044 from the test/data directory.  If you have Rust installed you can
     // do by cloning the Bindle repo and running:
     //
-    // RUST_LOG=info cargo run --bin bindle-server --features="cli" -- -i 127.0.0.1:14044 -d <this_repo>/test/data
+    // RUST_LOG=info cargo run --bin bindle-server --features="cli" -- -i 127.0.0.1:14044 -d <this_repo>/Bindle.Tests/data
 
     public class Integration
     {
@@ -78,7 +78,12 @@ namespace Bindle.Tests
                             mediaType: "text/plain",
                             size: 20,
                             annotations: new Dictionary<string, string>(),
-                            feature: new Dictionary<string, IDictionary<string, string>>()
+                            feature: new Dictionary<string, IDictionary<string, string>> {
+                                { "test", new Dictionary<string, string> {
+                                    { "a", "1" },
+                                    { "b", "2" },
+                                }}
+                            }
                         ),
                         conditions: null
                     ),
@@ -88,10 +93,11 @@ namespace Bindle.Tests
                 }
             );
             var createResult = await client.CreateInvoice(invoice);
-            Assert.Equal(1, createResult.missingParcels.length);
+            Assert.Equal(1, createResult.MissingParcels.Count);
             var fetched = await client.GetInvoice("bernards/abominable/bindle/0.0.1");
             Assert.Equal(invoice.Annotations["penguinType"], fetched.Annotations["penguinType"]);
             Assert.Equal(invoice.Parcels.Count, fetched.Parcels.Count);
+            Assert.Equal(invoice.Parcels[1].Label.Feature["test"]["a"], fetched.Parcels[1].Label.Feature["test"]["a"]);
             Assert.Equal(invoice.Groups.Count, fetched.Groups.Count);
         }
     }

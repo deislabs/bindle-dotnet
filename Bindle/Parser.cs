@@ -130,6 +130,13 @@ namespace Bindle
             var satisfiedBy = Enum.Parse<SatisfiedBy>(toml.TryGetString("satisfiedBy") ?? "allOf", true);
             return new Group(name, required, satisfiedBy);
         }
+
+        internal static CreateInvoiceResult ParseCreateInvoiceResult(TomlTable toml)
+        {
+            var invoice = ParseInvoice(toml.GetTomlTable("invoice"));
+            var missingParcels = (toml.TryGetTomlTables("missing") ?? new TomlTable[0]).Select(ParseLabel);
+            return new CreateInvoiceResult(invoice, missingParcels);
+        }
     }
 
     internal static class TomlHelpers
