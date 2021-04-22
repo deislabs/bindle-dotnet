@@ -100,5 +100,17 @@ namespace Bindle.Tests
             Assert.Equal(invoice.Parcels[1].Label.Feature["test"]["a"], fetched.Parcels[1].Label.Feature["test"]["a"]);
             Assert.Equal(invoice.Groups.Count, fetched.Groups.Count);
         }
+
+        [Fact]
+        public async Task CanYankInvoice()
+        {
+            var client = new BindleClient(DEMO_SERVER_URL);
+            await client.YankInvoice("your/fancy/bindle/0.3.0");  // TODO: use one that doesn't conflict with CanFetchInvoice (because Xunit parallelisation)
+            await Assert.ThrowsAsync<System.Net.WebException>(async () => {
+                await client.GetInvoice("your/fancy/bindle/0.3.0");
+            });
+            var invoice = await client.GetInvoice("your/fancy/bindle/0.3.0", IncludeYanked);
+            Assert.Equal("your/fancy/bindle", invoice.Bindle.Name);
+        }
     }
 }

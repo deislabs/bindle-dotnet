@@ -67,6 +67,13 @@ namespace Bindle
             return Parser.ParseCreateInvoiceResult(toml);
         }
 
+        public async Task YankInvoice(string invoiceId)
+        {
+            var httpClient = new HttpClient();
+            var uri = new Uri(_baseUri, INVOICE_PATH + "/" + invoiceId);
+            await httpClient.DeleteAsync(uri);
+        }
+
         private static string SlashSafe(string uri)
         {
             if (uri.EndsWith('/'))
