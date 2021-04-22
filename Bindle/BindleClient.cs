@@ -16,13 +16,14 @@ namespace Bindle
             _baseUri = new Uri(SlashSafe(baseUri));
         }
 
+        private const string INVOICE_PATH = "_i";
         private readonly Uri _baseUri;
 
         public async Task<Invoice> GetInvoice(string invoiceId, GetInvoiceOptions options = GetInvoiceOptions.None)
         {
             var query = GetInvoiceQueryString(options);
             var httpClient = new HttpClient();
-            var uri = new Uri(_baseUri, "_i/" + invoiceId + query);
+            var uri = new Uri(_baseUri, INVOICE_PATH + "/" + invoiceId + query);
             var response = await httpClient.GetAsync(uri);
             if (response == null)
             {
@@ -34,6 +35,36 @@ namespace Bindle
             }
             var toml = await ReadResponseToml(response);
             return Parser.ParseInvoice(toml);
+        }
+
+        public async Task<CreateInvoiceResult> CreateInvoice(Invoice invoice)
+        {
+            var invoiceToml = InvoiceWriter.Write(invoice);
+
+            if (invoiceToml == null)
+            {
+                throw new Exception("Error serialising invoice to TOML");
+            }
+
+            var httpClient = new HttpClient();
+            var uri = new Uri(_baseUri, INVOICE_PATH);
+            var requestContent = new StringContent(invoiceToml, null, "application/toml");
+            if (requestContent.Headers.ContentType != null)
+            {
+                requestContent.Headers.ContentType.CharSet = null;  // The Bindle server is VERY strict about the contents of the Content-Type header
+            }
+            var response = await httpClient.PostAsync(uri, requestContent);
+
+            if (response == null)
+            {
+                throw new Exception("No response from Bindle server");
+            }
+            if (response.StatusCode != HttpStatusCode.Accepted && response.StatusCode != HttpStatusCode.Created)
+            {
+                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
+            }
+            var toml = await ReadResponseToml(response);
+            return Parser.ParseCreateInvoiceResult(toml);
         }
 
         private static string SlashSafe(string uri)

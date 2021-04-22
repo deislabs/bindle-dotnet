@@ -10,7 +10,7 @@ namespace Bindle
 
     public class Invoice
     {
-        internal Invoice(
+        public Invoice(
             string bindleVersion,
             bool yanked,
             BindleMetadata bindle,
@@ -37,7 +37,7 @@ namespace Bindle
 
     public class BindleMetadata
     {
-        internal BindleMetadata(
+        public BindleMetadata(
             string name,
             string version,
             string? description,
@@ -73,7 +73,7 @@ namespace Bindle
 
     public class Label
     {
-        internal Label(
+        public Label(
             string name,
             string sha256,
             string mediaType,
@@ -100,7 +100,7 @@ namespace Bindle
 
     public class Conditions
     {
-        internal Conditions(
+        public Conditions(
             IEnumerable<string> memberOf,
             IEnumerable<string> requires
         )
@@ -115,7 +115,7 @@ namespace Bindle
 
     public class Group
     {
-        internal Group(
+        public Group(
             string name,
             bool required,
             SatisfiedBy satisfiedBy
@@ -136,5 +136,20 @@ namespace Bindle
         AllOf,
         OneOf,
         Optional,
+    }
+
+    public struct CreateInvoiceResult
+    {
+        internal CreateInvoiceResult(
+            Invoice invoice,
+            IEnumerable<Label> missingParcels
+        )
+        {
+            Invoice = invoice;
+            MissingParcels = DefensiveCopy.Create(missingParcels);
+        }
+
+        public Invoice Invoice { get; }
+        public IReadOnlyList<Label> MissingParcels { get; }
     }
 }
