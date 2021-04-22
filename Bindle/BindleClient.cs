@@ -74,6 +74,22 @@ namespace Bindle
             await httpClient.DeleteAsync(uri);
         }
 
+        public async Task<HttpContent> GetParcel(string invoiceId, string parcelId)
+        {
+            var httpClient = new HttpClient();
+            var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
+            var response = await httpClient.GetAsync(uri);
+            if (response == null)
+            {
+                throw new Exception("No response from Bindle server");
+            }
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
+            }
+            return response.Content;
+        }
+
         private static string SlashSafe(string uri)
         {
             if (uri.EndsWith('/'))
