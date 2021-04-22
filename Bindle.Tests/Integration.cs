@@ -112,5 +112,13 @@ namespace Bindle.Tests
             var invoice = await client.GetInvoice("your/fancy/bindle/0.3.0", IncludeYanked);
             Assert.Equal("your/fancy/bindle", invoice.Bindle.Name);
         }
+
+        [Fact]
+        public async Task CanFetchParcel()
+        {
+            var client = new BindleClient(DEMO_SERVER_URL);
+            var parcel = await client.GetParcel("mybindle/0.1.0", "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
+            Assert.Equal("Fie on you Gary", await parcel.ReadAsStringAsync());
+        }
     }
 }
