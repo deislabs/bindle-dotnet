@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -88,6 +89,28 @@ namespace Bindle
                 throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
             }
             return response.Content;
+        }
+
+        public async Task CreateParcel(string invoiceId, string parcelId, Stream content)
+        {
+            await CreateParcel(invoiceId, parcelId, new StreamContent(content));
+        }
+
+        public async Task CreateParcel(string invoiceId, string parcelId, string content)
+        {
+            await CreateParcel(invoiceId, parcelId, new StringContent(content));
+        }
+
+        public async Task CreateParcel(string invoiceId, string parcelId, byte[] content)
+        {
+            await CreateParcel(invoiceId, parcelId, new ByteArrayContent(content));
+        }
+
+        public async Task CreateParcel(string invoiceId, string parcelId, HttpContent content)
+        {
+            var httpClient = new HttpClient();
+            var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
+            await httpClient.PostAsync(uri, content);
         }
 
         private static string SlashSafe(string uri)
