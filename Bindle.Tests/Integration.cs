@@ -120,5 +120,14 @@ namespace Bindle.Tests
             var parcel = await client.GetParcel("mybindle/0.1.0", "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
             Assert.Equal("Fie on you Gary", await parcel.ReadAsStringAsync());
         }
+
+        [Fact]
+        public async Task CanCreateParcel()
+        {
+            var client = new BindleClient(DEMO_SERVER_URL);
+            await client.CreateParcel("mybindle/0.1.0", "460d5965e4d1909e8c7a3748a414956b7038ab5fd79937c9fcb2b214e6b0160a", "The front fell off");
+            var fetched = await client.GetParcel("mybindle/0.1.0", "460d5965e4d1909e8c7a3748a414956b7038ab5fd79937c9fcb2b214e6b0160a");
+            Assert.Equal("The front fell off", await fetched.ReadAsStringAsync());
+        }
     }
 }
