@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -18,6 +19,9 @@ namespace Bindle
         }
 
         private const string INVOICE_PATH = "_i";
+        private const string QUERY_PATH = "_q";
+        private const string RELATIONSHIP_PATH = "_r";
+
         private readonly Uri _baseUri;
 
         public async Task<Invoice> GetInvoice(string invoiceId, GetInvoiceOptions options = GetInvoiceOptions.None)
@@ -111,6 +115,23 @@ namespace Bindle
             var httpClient = new HttpClient();
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
             await httpClient.PostAsync(uri, content);
+        }
+
+        public async Task<IEnumerable<Label>> ListMissingParcels(string invoiceId)
+        {
+            var httpClient = new HttpClient();
+            var uri = new Uri(_baseUri, $"{RELATIONSHIP_PATH}/missing/{invoiceId}");
+            var response = await httpClient.GetAsync(uri);
+            if (response == null)
+            {
+                throw new Exception("No response from Bindle server");
+            }
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
+            }
+            var toml = await ReadResponseToml(response);
+            return Parser.ParseMissingLabels(toml);
         }
 
         private static string SlashSafe(string uri)

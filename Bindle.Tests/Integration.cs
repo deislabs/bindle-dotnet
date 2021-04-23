@@ -129,5 +129,14 @@ namespace Bindle.Tests
             var fetched = await client.GetParcel("mybindle/0.1.0", "460d5965e4d1909e8c7a3748a414956b7038ab5fd79937c9fcb2b214e6b0160a");
             Assert.Equal("The front fell off", await fetched.ReadAsStringAsync());
         }
+
+        [Fact]
+        public async Task CanListMissingParcels()
+        {
+            var client = new BindleClient(DEMO_SERVER_URL);
+            var missing = await client.ListMissingParcels("mybindle/0.3.0");
+            Assert.Contains(missing, (label) => label.Sha256 == "e1706ab0a39ac88094b6d54a3f5cdba41fe5a901");
+            Assert.DoesNotContain(missing, (label) => label.Sha256 == "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
+        }
     }
 }
