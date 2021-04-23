@@ -16,6 +16,16 @@ namespace Bindle
         )
         {
             _baseUri = new Uri(SlashSafe(baseUri));
+            _httpClient = new HttpClient();
+        }
+
+        public BindleClient(
+            string baseUri,
+            HttpMessageHandler messageHandler
+        )
+        {
+            _baseUri = new Uri(SlashSafe(baseUri));
+            _httpClient = new HttpClient(messageHandler);
         }
 
         private const string INVOICE_PATH = "_i";
@@ -23,13 +33,13 @@ namespace Bindle
         private const string RELATIONSHIP_PATH = "_r";
 
         private readonly Uri _baseUri;
+        private readonly HttpClient _httpClient;
 
         public async Task<Invoice> GetInvoice(string invoiceId, GetInvoiceOptions options = GetInvoiceOptions.None)
         {
             var query = GetInvoiceQueryString(options);
-            var httpClient = new HttpClient();
-            var uri = new Uri(_baseUri, INVOICE_PATH + "/" + invoiceId + query);
-            var response = await httpClient.GetAsync(uri);
+            var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}{query}");
+            var response = await _httpClient.GetAsync(uri);
             if (response == null)
             {
                 throw new Exception("No response from Bindle server");
@@ -51,14 +61,13 @@ namespace Bindle
                 throw new Exception("Error serialising invoice to TOML");
             }
 
-            var httpClient = new HttpClient();
             var uri = new Uri(_baseUri, INVOICE_PATH);
             var requestContent = new StringContent(invoiceToml, null, "application/toml");
             if (requestContent.Headers.ContentType != null)
             {
                 requestContent.Headers.ContentType.CharSet = null;  // The Bindle server is VERY strict about the contents of the Content-Type header
             }
-            var response = await httpClient.PostAsync(uri, requestContent);
+            var response = await _httpClient.PostAsync(uri, requestContent);
 
             if (response == null)
             {
@@ -74,16 +83,14 @@ namespace Bindle
 
         public async Task YankInvoice(string invoiceId)
         {
-            var httpClient = new HttpClient();
-            var uri = new Uri(_baseUri, INVOICE_PATH + "/" + invoiceId);
-            await httpClient.DeleteAsync(uri);
+            var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}");
+            await _httpClient.DeleteAsync(uri);
         }
 
         public async Task<HttpContent> GetParcel(string invoiceId, string parcelId)
         {
-            var httpClient = new HttpClient();
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
-            var response = await httpClient.GetAsync(uri);
+            var response = await _httpClient.GetAsync(uri);
             if (response == null)
             {
                 throw new Exception("No response from Bindle server");
@@ -112,16 +119,14 @@ namespace Bindle
 
         public async Task CreateParcel(string invoiceId, string parcelId, HttpContent content)
         {
-            var httpClient = new HttpClient();
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
-            await httpClient.PostAsync(uri, content);
+            await _httpClient.PostAsync(uri, content);
         }
 
         public async Task<IEnumerable<Label>> ListMissingParcels(string invoiceId)
         {
-            var httpClient = new HttpClient();
             var uri = new Uri(_baseUri, $"{RELATIONSHIP_PATH}/missing/{invoiceId}");
-            var response = await httpClient.GetAsync(uri);
+            var response = await _httpClient.GetAsync(uri);
             if (response == null)
             {
                 throw new Exception("No response from Bindle server");
