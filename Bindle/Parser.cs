@@ -137,6 +137,11 @@ namespace Bindle
             var missingParcels = (toml.TryGetTomlTables("missing") ?? new TomlTable[0]).Select(ParseLabel);
             return new CreateInvoiceResult(invoice, missingParcels);
         }
+
+        internal static IEnumerable<Label> ParseMissingLabels(TomlTable toml)
+        {
+            return (toml.TryGetTomlTables("missing") ?? new TomlTable[0]).Select(ParseLabel);
+        }
     }
 
     internal static class TomlHelpers
