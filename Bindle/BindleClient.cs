@@ -40,14 +40,20 @@ namespace Bindle
             var query = GetInvoiceQueryString(options);
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}{query}");
             var response = await _httpClient.GetAsync(uri);
-            if (response == null)
+            ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
+            
+            if (response.StatusCode == HttpStatusCode.Forbidden)
             {
-                throw new Exception("No response from Bindle server");
+                if ((options & GetInvoiceOptions.IncludeYanked) == 0)
+                {
+                    throw new BindleYankedException();
+                }
+                else
+                {
+                    throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}", response);
+                }
             }
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
-            }
+
             var toml = await ReadResponseToml(response);
             return Parser.ParseInvoice(toml);
         }
@@ -56,11 +62,6 @@ namespace Bindle
         {
             var invoiceToml = InvoiceWriter.Write(invoice);
 
-            if (invoiceToml == null)
-            {
-                throw new Exception("Error serialising invoice to TOML");
-            }
-
             var uri = new Uri(_baseUri, INVOICE_PATH);
             var requestContent = new StringContent(invoiceToml, null, "application/toml");
             if (requestContent.Headers.ContentType != null)
@@ -68,15 +69,8 @@ namespace Bindle
                 requestContent.Headers.ContentType.CharSet = null;  // The Bindle server is VERY strict about the contents of the Content-Type header
             }
             var response = await _httpClient.PostAsync(uri, requestContent);
+            ExpectResponseCode(response, HttpStatusCode.Created, HttpStatusCode.Accepted);
 
-            if (response == null)
-            {
-                throw new Exception("No response from Bindle server");
-            }
-            if (response.StatusCode != HttpStatusCode.Accepted && response.StatusCode != HttpStatusCode.Created)
-            {
-                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
-            }
             var toml = await ReadResponseToml(response);
             return Parser.ParseCreateInvoiceResult(toml);
         }
@@ -84,21 +78,16 @@ namespace Bindle
         public async Task YankInvoice(string invoiceId)
         {
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}");
-            await _httpClient.DeleteAsync(uri);
+            var response = await _httpClient.DeleteAsync(uri);
+            ExpectResponseCode(response, HttpStatusCode.OK);
         }
 
         public async Task<HttpContent> GetParcel(string invoiceId, string parcelId)
         {
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
             var response = await _httpClient.GetAsync(uri);
-            if (response == null)
-            {
-                throw new Exception("No response from Bindle server");
-            }
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
-            }
+            ExpectResponseCode(response, HttpStatusCode.OK);
+            
             return response.Content;
         }
 
@@ -120,21 +109,16 @@ namespace Bindle
         public async Task CreateParcel(string invoiceId, string parcelId, HttpContent content)
         {
             var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
-            await _httpClient.PostAsync(uri, content);
+            var response = await _httpClient.PostAsync(uri, content);
+            ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Created);
         }
 
         public async Task<IEnumerable<Label>> ListMissingParcels(string invoiceId)
         {
             var uri = new Uri(_baseUri, $"{RELATIONSHIP_PATH}/missing/{invoiceId}");
             var response = await _httpClient.GetAsync(uri);
-            if (response == null)
-            {
-                throw new Exception("No response from Bindle server");
-            }
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new System.Net.WebException($"Bindle server returned status code {response.StatusCode}");
-            }
+            ExpectResponseCode(response, HttpStatusCode.OK);
+
             var toml = await ReadResponseToml(response);
             return Parser.ParseMissingLabels(toml);
         }
@@ -148,18 +132,30 @@ namespace Bindle
             return uri + '/';
         }
 
+        private static void ExpectResponseCode(HttpResponseMessage response, params HttpStatusCode[] codes)
+        {
+            if (response == null)
+            {
+                throw new NoResponseException();
+            }
+            if (!codes.Contains(response.StatusCode))
+            {
+                throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}", response);
+            }
+        }
+
         private async static Task<TomlTable> ReadResponseToml(HttpResponseMessage response)
         {
             var responseText = await response.Content.ReadAsStringAsync();
             var responseToml = Tomlyn.Toml.Parse(responseText);
             if (responseToml == null)
             {
-                throw new Exception("Empty response from Bindle server");
+                throw new ResponseContentException("Empty response from Bindle server");
             }
             if (responseToml.HasErrors)
             {
                 var errors = String.Join(", ", responseToml.Diagnostics.Select(d => d.Message));
-                throw new Exception($"Invalid response from Bindle server: {errors}");
+                throw new ResponseContentException($"Invalid response from Bindle server: {errors}");
             }
             return Tomlyn.Toml.ToModel(responseToml);
         }

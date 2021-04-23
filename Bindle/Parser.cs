@@ -13,7 +13,7 @@ namespace Bindle
             var bindleVersion = toml.GetString("bindleVersion");
             if (bindleVersion != "1.0.0")
             {
-                throw new System.Exception($"Unknown Bindle version {bindleVersion}");
+                throw new ResponseContentException($"Unknown Bindle version {bindleVersion}");
             }
 
             var yanked = toml.TryGetBool("yanked") ?? false;
@@ -165,7 +165,7 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected string but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected string but got ${t.Kind.ToString()}");
                 }
             }
             return null;
@@ -181,7 +181,7 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected boolean but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected boolean but got ${t.Kind.ToString()}");
                 }
             }
             return null;
@@ -198,7 +198,7 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected string array but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected string array but got ${t.Kind.ToString()}");
                 }
             }
             return null;
@@ -214,7 +214,7 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected section but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected section but got ${t.Kind.ToString()}");
                 }
             }
             return null;
@@ -230,7 +230,7 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected sections but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected sections but got ${t.Kind.ToString()}");
                 }
             }
             return null;
@@ -242,7 +242,7 @@ namespace Bindle
             {
                 return t;
             }
-            throw new System.Exception($"Missing field {key}");
+            throw new ResponseContentException($"Missing field {key}");
         }
 
         internal static string GetString(this TomlTable toml, string key)
@@ -255,10 +255,10 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected string but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected string but got ${t.Kind.ToString()}");
                 }
             }
-            throw new System.Exception($"Missing field {key}");
+            throw new ResponseContentException($"Missing field {key}");
         }
 
         internal static long GetLong(this TomlTable toml, string key)
@@ -271,10 +271,10 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected integer but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected integer but got ${t.Kind.ToString()}");
                 }
             }
-            throw new System.Exception($"Missing field {key}");
+            throw new ResponseContentException($"Missing field {key}");
         }
 
         internal static TomlTable GetTomlTable(this TomlTable toml, string key)
@@ -287,10 +287,10 @@ namespace Bindle
                 }
                 else
                 {
-                    throw new System.Exception($"Invalid field {key}: expected section but got ${t.Kind.ToString()}");
+                    throw new ResponseContentException($"Invalid field {key}: expected section but got ${t.Kind.ToString()}");
                 }
             }
-            throw new System.Exception($"Missing section {key}");
+            throw new ResponseContentException($"Missing section {key}");
         }
     }
 }
