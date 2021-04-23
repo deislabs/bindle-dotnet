@@ -106,7 +106,7 @@ namespace Bindle.Tests
         {
             var client = new BindleClient(DEMO_SERVER_URL);
             await client.YankInvoice("your/fancy/bindle/0.3.0");  // TODO: use one that doesn't conflict with CanFetchInvoice (because Xunit parallelisation)
-            await Assert.ThrowsAsync<System.Net.WebException>(async () => {
+            await Assert.ThrowsAsync<BindleYankedException>(async () => {
                 await client.GetInvoice("your/fancy/bindle/0.3.0");
             });
             var invoice = await client.GetInvoice("your/fancy/bindle/0.3.0", IncludeYanked);

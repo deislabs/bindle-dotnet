@@ -116,7 +116,7 @@ namespace Bindle
                 SatisfiedBy.AllOf => "allOf",
                 SatisfiedBy.OneOf => "oneOf",
                 SatisfiedBy.Optional => "optional",
-                _ => throw new Exception($"Unknown SatisfiedBy value {value}"),
+                _ => throw new InvalidOperationException($"Unknown SatisfiedBy value {value}"),
             };
         }
     }
