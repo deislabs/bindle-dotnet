@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Tomlyn.Model;
 
-namespace Bindle
+namespace Deislabs.Bindle
 {
     internal static class Parser
     {
