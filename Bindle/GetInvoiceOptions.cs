@@ -1,6 +1,6 @@
 using System;
 
-namespace Bindle
+namespace Deislabs.Bindle
 {
     [Flags]
     public enum GetInvoiceOptions

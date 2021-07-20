@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Tomlyn.Model;
 
-namespace Bindle
+namespace Deislabs.Bindle
 {
     // We can't use init properties here because we can't guarantee that
     // they will be initialised to non-null values; so we have to write an

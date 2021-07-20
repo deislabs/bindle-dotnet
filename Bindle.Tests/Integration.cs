@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
+using static Deislabs.Bindle.GetInvoiceOptions;
 
-using static Bindle.GetInvoiceOptions;
-
-namespace Bindle.Tests
+namespace Deislabs.Bindle.Tests
 {
     // To run this against the data assumed in the integration tests, run the Bindle server
     // to serve files on port 14044 from the test/data directory.  If you have Rust installed you can
@@ -13,7 +11,11 @@ namespace Bindle.Tests
     //
     // RUST_LOG=info cargo run --bin bindle-server --features="cli" -- -i 127.0.0.1:14044 -d <this_repo>/Bindle.Tests/data
 
-    public class Integration
+    // Alternatively if you set the variable BINDLE_SERVER_PATH to the relative path of bindle-server then the test will start and stop the server automatically
+    // e.g. if bindle is in a peer directory to bindle-dotnet and the debug build is being used then set the variable to "../../../../../bindle/target/debug"
+
+    [TestCaseOrderer("Deislabs.Bindle.Tests.TestPriorityOrderer", "Bindle.Tests")]
+    public class Integration : IClassFixture<IntegrationFixture>
     {
         const string DEMO_SERVER_URL = "http://localhost:14044/v1";
 
@@ -44,8 +46,6 @@ namespace Bindle.Tests
         [Fact]
         public async Task CanCreateInvoices()
         {
-            // TODO: this results in creating the invoice, so it can't be run twice!
-            // For now you need to delete test/data/invoices/8fb420... and restart the Bindle server
             var client = new BindleClient(DEMO_SERVER_URL);
             var invoice = new Invoice(
                 bindleVersion: "1.0.0",
@@ -101,12 +101,15 @@ namespace Bindle.Tests
             Assert.Equal(invoice.Groups.Count, fetched.Groups.Count);
         }
 
+        // Make sure CanYankInvoice runs after CanCreateInvoice
         [Fact]
+        [TestPriority(10)]
         public async Task CanYankInvoice()
         {
             var client = new BindleClient(DEMO_SERVER_URL);
-            await client.YankInvoice("your/fancy/bindle/0.3.0");  // TODO: use one that doesn't conflict with CanFetchInvoice (because Xunit parallelisation)
-            await Assert.ThrowsAsync<BindleYankedException>(async () => {
+            await client.YankInvoice("your/fancy/bindle/0.3.0"); 
+            await Assert.ThrowsAsync<BindleYankedException>(async () =>
+            {
                 await client.GetInvoice("your/fancy/bindle/0.3.0");
             });
             var invoice = await client.GetInvoice("your/fancy/bindle/0.3.0", IncludeYanked);

@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Tomlyn.Model;
 
-namespace Bindle
+namespace Deislabs.Bindle
 {
     public class BindleClient
     {
