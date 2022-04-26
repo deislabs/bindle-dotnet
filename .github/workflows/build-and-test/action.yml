@@ -1,13 +1,13 @@
 name: "Build And Test Action"
 description: "Builds and Tests bindle-dotnet"
 inputs:
-  configuration: 
+  configuration:
     description: 'The Configration to build and test'
     required: true
     default: 'release'
 runs:
   using: "composite"
-  steps: 
+  steps:
     - name: Restore dependencies
       run: dotnet restore
       shell: bash
@@ -22,7 +22,7 @@ runs:
       working-directory: bindleserver
       shell: bash
     - name: Test
-      env:  
-        BINDLE_SERVER_PATH: ../../../../bindleserver/target/debug
-      run: dotnet test 
+      env:
+        BINDLE_SERVER_PATH: ../../../../../bindleserver/target/debug
+      run: dotnet test
       shell: bash
