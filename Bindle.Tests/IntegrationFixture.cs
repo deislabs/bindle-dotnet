@@ -31,7 +31,7 @@ namespace Deislabs.Bindle.Tests
                 var psi = new ProcessStartInfo
                 {
                     FileName = fullPath,
-                    Arguments = $"-i 127.0.0.1:14044 -d {dataPath}",
+                    Arguments = $"--unauthenticated -i 127.0.0.1:14044 -d {dataPath}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardError = true,

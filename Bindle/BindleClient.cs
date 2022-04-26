@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -56,6 +57,29 @@ namespace Deislabs.Bindle
 
             var toml = await ReadResponseToml(response);
             return Parser.ParseInvoice(toml);
+        }
+
+        public async Task<List<string>> QueryDistinctInvoicesNames(string? queryString = null,
+            ulong? offset = null,
+            long? limit = null,
+            bool? strict = null,
+            string? semVer = null,
+            bool? yanked = null)
+        {
+            var query = GetDistinctInvoicesNamesQueryString(queryString, offset, limit, strict, semVer, yanked);
+            var uri = new Uri(_baseUri, $"{QUERY_PATH}?{query}");
+            var response = await _httpClient.GetAsync(uri);
+            ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
+            
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}", response);
+            }
+
+            var tomlTables = await ReadResponseToml(response);
+            var invoices = Parser.ParseInvoices(tomlTables);
+
+            return invoices.Select(invoice => invoice.Bindle.Name).Distinct().ToList();
         }
 
         public async Task<CreateInvoiceResult> CreateInvoice(Invoice invoice)
@@ -167,6 +191,43 @@ namespace Deislabs.Bindle
                 return "?yanked=true";
             }
             return String.Empty;
+        }
+
+        private static string GetDistinctInvoicesNamesQueryString(string? queryString = null,
+            ulong? offset = null,
+            long? limit = null,
+            bool? strict = false,
+            string? semVer = null,
+            bool? yanked = null)
+        {
+            NameValueCollection query = System.Web.HttpUtility.ParseQueryString(string.Empty);
+
+            if (!String.IsNullOrEmpty(queryString))
+            {
+                query.Add("q", queryString);
+            }
+            if (offset.HasValue)
+            {
+                query.Add("o", offset.Value.ToString());
+            }
+            if (limit.HasValue)
+            {
+                query.Add("l", limit.Value.ToString());
+            }
+            if (strict.HasValue)
+            {
+                query.Add("strict", strict.Value.ToString());
+            }
+            if (!String.IsNullOrEmpty(semVer))
+            {
+                query.Add("v", semVer);
+            }
+            if (yanked.HasValue)
+            {
+                query.Add("yanked", yanked.Value.ToString());
+            }
+
+            return query.ToString();
         }
     }
 }
