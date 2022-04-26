@@ -59,7 +59,7 @@ namespace Deislabs.Bindle
             return Parser.ParseInvoice(toml);
         }
 
-        public async Task<List<string>> QueryDistinctInvoicesNames(string? queryString = null,
+        public async Task<List<Invoice>> QueryInvoices(string? queryString = null,
             ulong? offset = null,
             long? limit = null,
             bool? strict = null,
@@ -79,7 +79,7 @@ namespace Deislabs.Bindle
             var tomlTables = await ReadResponseToml(response);
             var invoices = Parser.ParseInvoices(tomlTables);
 
-            return invoices.Select(invoice => invoice.Bindle.Name).Distinct().ToList();
+            return invoices.ToList();
         }
 
         public async Task<CreateInvoiceResult> CreateInvoice(Invoice invoice)
