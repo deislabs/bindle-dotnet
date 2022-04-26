@@ -31,7 +31,7 @@ namespace Deislabs.Bindle.Tests
                 var psi = new ProcessStartInfo
                 {
                     FileName = fullPath,
-                    Arguments = $"-i 127.0.0.1:14044 -d {dataPath}",
+                    Arguments = $"--unauthenticated -i 127.0.0.1:14044 -d {dataPath}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardError = true,
@@ -88,7 +88,7 @@ namespace Deislabs.Bindle.Tests
             Directory.Delete(dataPath, true);  
             CopyDirectory(testDataCopy, dataPath);
             Directory.Delete(testDataCopy, true);
-            Directory.Delete(testOutput, true);      
+            Directory.Delete(testOutput, true);
         }
 
         private void CopyDirectory(string source, string dest)

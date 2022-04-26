@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using static Deislabs.Bindle.GetInvoiceOptions;
@@ -31,6 +32,14 @@ namespace Deislabs.Bindle.Tests
             Assert.Equal("daemon", invoice.Parcels[0].Label.Name);
             Assert.Equal(3, invoice.Groups.Count);
             Assert.Equal("server", invoice.Groups[0].Name);
+        }
+
+        [Fact]
+        public async Task CanQueryInvoices()
+        {
+            var client = new BindleClient(DEMO_SERVER_URL);
+            var invoices = await client.QueryInvoices(queryString: "my");
+            Assert.True(invoices.All(i => i.Bindle.Name.Contains("my")));
         }
 
         [Fact]

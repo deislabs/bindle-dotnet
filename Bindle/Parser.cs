@@ -32,6 +32,39 @@ namespace Deislabs.Bindle
                 groups
             );
         }
+        
+        internal static List<Invoice> ParseInvoices(TomlTable toml)
+        {
+            var invoiceList = new List<Invoice>();
+
+            toml.TryGetValue("invoices", out var invoices);
+            foreach (var tomlTable in (TomlTableArray)invoices)
+            {
+                var bindleVersion = tomlTable.GetString("bindleVersion");
+                if (bindleVersion != "1.0.0")
+                {
+                    throw new ResponseContentException($"Unknown Bindle version {bindleVersion}");
+                }
+
+                var yanked = tomlTable.TryGetBool("yanked") ?? false;
+
+                var bindle = ParseBindleMetadata(tomlTable.GetTomlTable("bindle"));
+                var annotations = ParseStringDictionary(tomlTable.TryGetTomlTable("annotations"));
+                var parcels = ParseParcels(tomlTable.TryGetTomlTables("parcel"));
+                var groups = ParseGroups(tomlTable.TryGetTomlTables("group"));
+
+                invoiceList.Add(new Invoice(
+                    bindleVersion,
+                    yanked,
+                    bindle,
+                    annotations,
+                    parcels,
+                    groups
+                ));
+            }
+
+            return invoiceList;
+        }
 
         internal static BindleMetadata ParseBindleMetadata(TomlTable toml)
         {
