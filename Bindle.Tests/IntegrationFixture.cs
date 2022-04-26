@@ -88,7 +88,7 @@ namespace Deislabs.Bindle.Tests
             Directory.Delete(dataPath, true);  
             CopyDirectory(testDataCopy, dataPath);
             Directory.Delete(testDataCopy, true);
-            Directory.Delete(testOutput, true);      
+            Directory.Delete(testOutput, true);
         }
 
         private void CopyDirectory(string source, string dest)
