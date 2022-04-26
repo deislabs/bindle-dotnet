@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Tomlyn;
+using Tomlyn.Syntax;
 
 namespace Deislabs.Bindle;
 
@@ -56,8 +57,12 @@ public class BindleClient
         }
 
         var content = await response.Content.ReadAsStringAsync();
-        ValidateContentIsToml(content);
-        return Toml.ToModel<Invoice>(content);
+        var syntax = GetTomlSyntax(content);
+        var tomlOptions = new TomlModelOptions()
+        {
+            ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
+        };
+        return syntax.ToModel<Invoice>(tomlOptions);
     }
 
     public async Task<List<Invoice>> QueryInvoices(string? queryString = null,
@@ -78,8 +83,12 @@ public class BindleClient
         }
 
         var content = await response.Content.ReadAsStringAsync();
-        ValidateContentIsToml(content);
-        return Toml.ToModel<List<Invoice>>(content);
+        var syntax = GetTomlSyntax(content);
+        var tomlOptions = new TomlModelOptions()
+        {
+            ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
+        };
+        return syntax.ToModel<List<Invoice>>(tomlOptions);
     }
 
     public async Task<CreateInvoiceResult> CreateInvoice(Invoice invoice)
@@ -96,8 +105,12 @@ public class BindleClient
         ExpectResponseCode(response, HttpStatusCode.Created, HttpStatusCode.Accepted);
 
         var content = await response.Content.ReadAsStringAsync();
-        ValidateContentIsToml(content);
-        return Toml.ToModel<CreateInvoiceResult>(content);
+        var syntax = GetTomlSyntax(content);
+        var tomlOptions = new TomlModelOptions()
+        {
+            ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
+        };
+        return syntax.ToModel<CreateInvoiceResult>(tomlOptions);
     }
 
     public async Task YankInvoice(string invoiceId)
@@ -145,8 +158,12 @@ public class BindleClient
         ExpectResponseCode(response, HttpStatusCode.OK);
 
         var content = await response.Content.ReadAsStringAsync();
-        ValidateContentIsToml(content);
-        return Toml.ToModel<List<Label>>(content);
+        var syntax = GetTomlSyntax(content);
+        var tomlOptions = new TomlModelOptions()
+        {
+            ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
+        };
+        return syntax.ToModel<List<Label>>(tomlOptions);
     }
 
     private static string SlashSafe(string uri)
@@ -168,7 +185,7 @@ public class BindleClient
         }
     }
 
-    private static void ValidateContentIsToml(string content)
+    private static DocumentSyntax GetTomlSyntax(string content)
     {
         var responseToml = Toml.Parse(content);
         _ = responseToml ?? throw new ResponseContentException("Empty response from Bindle server");
@@ -178,6 +195,7 @@ public class BindleClient
             var errors = String.Join(", ", responseToml.Diagnostics.Select(d => d.Message));
             throw new ResponseContentException($"Invalid response from Bindle server: {errors}");
         }
+        return responseToml;
     }
 
     private static string GetInvoiceQueryString(GetInvoiceOptions options)

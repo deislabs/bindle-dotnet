@@ -158,6 +158,6 @@ public class CreateInvoiceResult
         MissingParcels = DefensiveCopy.Create(missingParcels);
     }
 
-    public Invoice Invoice { get; } = new Invoice{};
+    public Invoice Invoice { get; } = new Invoice { };
     public IReadOnlyList<Label> MissingParcels { get; } = new List<Label>();
 }

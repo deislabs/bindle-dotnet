@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BA023DCE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bindle.IntegrationTests", "tests\Bindle.IntegrationTests\Bindle.IntegrationTests.csproj", "{8E85E8CA-8E94-4018-9B75-20D6A5B80C4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bindle.UnitTests", "tests\Bindle.UnitTests\Bindle.UnitTests.csproj", "{D154DA87-9B47-4BB9-8C4F-5C6FF3232D37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,9 +30,14 @@ Global
 		{8E85E8CA-8E94-4018-9B75-20D6A5B80C4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E85E8CA-8E94-4018-9B75-20D6A5B80C4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E85E8CA-8E94-4018-9B75-20D6A5B80C4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D154DA87-9B47-4BB9-8C4F-5C6FF3232D37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D154DA87-9B47-4BB9-8C4F-5C6FF3232D37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D154DA87-9B47-4BB9-8C4F-5C6FF3232D37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D154DA87-9B47-4BB9-8C4F-5C6FF3232D37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{410ACD97-570A-4EBC-8E33-F2D0423BBC0E} = {1A7FD715-9238-40B9-8795-0FCCD31143E0}
 		{8E85E8CA-8E94-4018-9B75-20D6A5B80C4B} = {BA023DCE-8C3B-41BD-9C59-D2F28FFD755D}
+		{D154DA87-9B47-4BB9-8C4F-5C6FF3232D37} = {BA023DCE-8C3B-41BD-9C59-D2F28FFD755D}
 	EndGlobalSection
 EndGlobal
