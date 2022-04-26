@@ -38,8 +38,8 @@ namespace Deislabs.Bindle.Tests
         public async Task CanFetchDistinctInvoicesNames()
         {
             var client = new BindleClient(DEMO_SERVER_URL);
-            var invoices = await client.QueryDistinctInvoicesNames(queryString: "your", offset: 0, limit: 2);
-            Assert.Equal(1, invoices.Count);
+            var invoices = await client.QueryDistinctInvoicesNames(queryString: "my", offset: 0, limit: 2);
+            Assert.Equal(2, invoices.Count);
             Assert.Equal(invoices.Distinct().ToList().Count, invoices.Count);
         }
 

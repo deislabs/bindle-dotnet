@@ -216,7 +216,7 @@ namespace Deislabs.Bindle
             }
             if (strict.HasValue)
             {
-                query.Add("strict", strict.Value.ToString());
+                query.Add("strict", strict.Value.ToString().ToLower());
             }
             if (!String.IsNullOrEmpty(semVer))
             {
@@ -224,7 +224,7 @@ namespace Deislabs.Bindle
             }
             if (yanked.HasValue)
             {
-                query.Add("yanked", yanked.Value.ToString());
+                query.Add("yanked", yanked.Value.ToString().ToLower());
             }
 
             return query.ToString();
