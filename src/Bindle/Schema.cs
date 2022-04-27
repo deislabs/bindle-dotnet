@@ -11,19 +11,19 @@ public class Invoice
     public string BindleVersion { get; set; } = "";
     public bool Yanked { get; set; }
     public BindleMetadata? Bindle { get; set; }
-    public IDictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
 
     // TODO(bacongobbler): upstream naming bug?
     [DataMember(Name = "signature")]
-    public IList<Signature> Signatures { get; set; } = new List<Signature>();
+    public List<Signature> Signatures { get; set; } = new List<Signature>();
 
     // TODO(bacongobbler): upstream naming bug?
     [DataMember(Name = "parcel")]
-    public IList<Parcel> Parcels { get; set; } = new List<Parcel>();
+    public List<Parcel> Parcels { get; set; } = new List<Parcel>();
 
     // TODO(bacongobbler): upstream naming bug?
     [DataMember(Name = "group")]
-    public IList<Group> Groups { get; set; } = new List<Group>();
+    public List<Group> Groups { get; set; } = new List<Group>();
 }
 
 public class BindleMetadata
@@ -31,7 +31,7 @@ public class BindleMetadata
     public string? Name { get; set; }
     public string? Version { get; set; }
     public string? Description { get; set; }
-    public IList<string> Authors { get; set; } = new List<string>();
+    public List<string> Authors { get; set; } = new List<string>();
 }
 
 public class Signature
@@ -47,7 +47,7 @@ public class Signature
 public class SignatureKey
 {
     public string? Label { get; set; }
-    public IList<string> Roles { get; set; } = new List<string>();
+    public List<string> Roles { get; set; } = new List<string>();
     public string? Key { get; set; }
     public string? LabelSignature { get; set; }
 }
@@ -55,7 +55,7 @@ public class SignatureKey
 public class Keyring
 {
     public string? Version { get; set; }
-    public IList<SignatureKey> Key { get; set; } = new List<SignatureKey>();
+    public List<SignatureKey> Key { get; set; } = new List<SignatureKey>();
 }
 
 public class Parcel
@@ -70,14 +70,14 @@ public class Label
     public string? Sha256 { get; set; }
     public string? MediaType { get; set; }
     public long Size { get; set; }
-    public IDictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
-    public IDictionary<string, IDictionary<string, string>> Feature { get; set; } = new Dictionary<string, IDictionary<string, string>>();
+    public Dictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, Dictionary<string, string>> Feature { get; set; } = new Dictionary<string, Dictionary<string, string>>();
 }
 
 public class Condition
 {
-    public IList<string> MemberOf { get; set; } = new List<string>();
-    public IList<string> Requires { get; set; } = new List<string>();
+    public List<string> MemberOf { get; set; } = new List<string>();
+    public List<string> Requires { get; set; } = new List<string>();
 }
 
 public class Group
@@ -97,5 +97,5 @@ public enum SatisfiedBy
 public class CreateInvoiceResult
 {
     public Invoice Invoice { get; set; } = new Invoice { };
-    public IList<Label> MissingParcels { get; set; } = new List<Label>();
+    public List<Label> MissingParcels { get; set; } = new List<Label>();
 }
