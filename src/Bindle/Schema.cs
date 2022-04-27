@@ -7,135 +7,49 @@ namespace Deislabs.Bindle;
 // explicit constructor (and make defensive copies).
 public class Invoice
 {
-    public Invoice() { }
-
-    public Invoice(
-        string bindleVersion,
-        bool yanked,
-        BindleMetadata bindle,
-        IDictionary<string, string> annotations,
-        IEnumerable<Parcel> parcels,
-        IEnumerable<Group> groups
-    )
-    {
-        BindleVersion = bindleVersion;
-        Yanked = yanked;
-        Bindle = bindle;
-        Annotations = DefensiveCopy.Create(annotations);
-        Parcels = DefensiveCopy.Create(parcels);
-        Groups = DefensiveCopy.Create(groups);
-    }
-
-    public string BindleVersion { get; } = "";
-    public bool Yanked { get; }
-    public BindleMetadata Bindle { get; } = new BindleMetadata();
-    public IReadOnlyDictionary<string, string> Annotations { get; } = new Dictionary<string, string>();
-    public IReadOnlyList<Parcel> Parcels { get; } = new List<Parcel>();
-    public IReadOnlyList<Group> Groups { get; } = new List<Group>();
+    public string BindleVersion { get; set; } = "";
+    public bool Yanked { get; set; }
+    public BindleMetadata? Bindle { get; set; }
+    public IDictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
+    public IList<Parcel> Parcels { get; set; } = new List<Parcel>();
+    public IList<Group> Groups { get; set; } = new List<Group>();
 }
 
 public class BindleMetadata
 {
-    public BindleMetadata() { }
-
-    public BindleMetadata(string name, string version)
-    {
-        Name = name;
-        Version = version;
-    }
-
-    public BindleMetadata(
-        string name,
-        string version,
-        string? description,
-        IEnumerable<string> authors
-    )
-    {
-        Name = name;
-        Version = version;
-        Description = description;
-        Authors = DefensiveCopy.Create(authors);
-    }
-
-    public string? Name { get; }
-    public string? Version { get; }
-    public string? Description { get; }
-    public IReadOnlyList<string> Authors { get; } = new List<string>();
+    public string? Name { get; set; }
+    public string? Version { get; set; }
+    public string? Description { get; set; }
+    public IList<string> Authors { get; set; } = new List<string>();
 }
 
 public class Parcel
 {
-    public Parcel(
-        Label label,
-        Conditions? conditions
-    )
-    {
-        Label = label;
-        Conditions = conditions;
-    }
-
-    public Label Label { get; }
-    public Conditions? Conditions { get; }
+    public Label? Label { get; set; }
+    public Conditions? Conditions { get; set; }
 }
 
 public class Label
 {
-    public Label(
-        string name,
-        string sha256,
-        string mediaType,
-        long size,
-        IDictionary<string, string> annotations,
-        IDictionary<string, IDictionary<string, string>> feature
-    )
-    {
-        Name = name;
-        Sha256 = sha256;
-        MediaType = mediaType;
-        Size = size;
-        Annotations = DefensiveCopy.Create(annotations);
-        Feature = DefensiveCopy.Create(feature);
-    }
-
-    public string Name { get; }
-    public string Sha256 { get; }
-    public string MediaType { get; }
-    public long Size { get; }
-    public IReadOnlyDictionary<string, string> Annotations { get; }
-    public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> Feature { get; }
+    public string? Name { get; set; }
+    public string? Sha256 { get; set; }
+    public string? MediaType { get; set; }
+    public long Size { get; set; }
+    public IDictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
+    public IDictionary<string, IDictionary<string, string>> Feature { get; set; } = new Dictionary<string, IDictionary<string, string>>();
 }
 
 public class Conditions
 {
-    public Conditions(
-        IEnumerable<string> memberOf,
-        IEnumerable<string> requires
-    )
-    {
-        MemberOf = DefensiveCopy.Create(memberOf);
-        Requires = DefensiveCopy.Create(requires);
-    }
-
-    public IReadOnlyList<string> MemberOf { get; }
-    public IReadOnlyList<string> Requires { get; }
+    public IList<string> MemberOf { get; set; } = new List<string>();
+    public IList<string> Requires { get; set; } = new List<string>();
 }
 
 public class Group
 {
-    public Group(
-        string name,
-        bool required,
-        SatisfiedBy satisfiedBy
-    )
-    {
-        Name = name;
-        Required = required;
-        SatisfiedBy = satisfiedBy;
-    }
-
-    public string Name { get; }
-    public bool Required { get; }
-    public SatisfiedBy SatisfiedBy { get; }
+    public string? Name { get; set; }
+    public bool Required { get; set; }
+    public SatisfiedBy SatisfiedBy { get; set; }
 }
 
 public enum SatisfiedBy
@@ -147,17 +61,6 @@ public enum SatisfiedBy
 
 public class CreateInvoiceResult
 {
-    public CreateInvoiceResult() { }
-
-    public CreateInvoiceResult(
-        Invoice invoice,
-        IEnumerable<Label> missingParcels
-    )
-    {
-        Invoice = invoice;
-        MissingParcels = DefensiveCopy.Create(missingParcels);
-    }
-
-    public Invoice Invoice { get; } = new Invoice { };
-    public IReadOnlyList<Label> MissingParcels { get; } = new List<Label>();
+    public Invoice Invoice { get; set; } = new Invoice { };
+    public IList<Label> MissingParcels { get; set; } = new List<Label>();
 }

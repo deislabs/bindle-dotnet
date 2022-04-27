@@ -18,11 +18,14 @@ public class InvoiceWriter
     {
         Write("bindleVersion", invoice.BindleVersion);
 
-        WriteTableStart("bindle");
-        Write("name", invoice.Bindle.Name);
-        Write("version", invoice.Bindle.Version);
-        Write("description", invoice.Bindle.Description);
-        Write("authors", invoice.Bindle.Authors);
+        if (invoice.Bindle is not null)
+        {
+            WriteTableStart("bindle");
+            Write("name", invoice.Bindle.Name);
+            Write("version", invoice.Bindle.Version);
+            Write("description", invoice.Bindle.Description);
+            Write("authors", invoice.Bindle.Authors);
+        }
 
         if (invoice.Annotations.Any())
         {
@@ -36,29 +39,32 @@ public class InvoiceWriter
         foreach (var parcel in invoice.Parcels)
         {
             WriteTableArrayStart("parcel");
-            WriteTableStart("parcel.label");
-            Write("name", parcel.Label.Name);
-            Write("sha256", parcel.Label.Sha256);
-            Write("mediaType", parcel.Label.MediaType);
-            Write("size", parcel.Label.Size);
-
-            if (parcel.Label.Annotations.Any())
+            if (parcel.Label is not null)
             {
-                WriteTableStart("parcel.label.annotations");
-                foreach (var kvp in parcel.Label.Annotations)
-                {
-                    Write(kvp.Key, kvp.Value);
-                }
-            }
+                WriteTableStart("parcel.label");
+                Write("name", parcel.Label.Name);
+                Write("sha256", parcel.Label.Sha256);
+                Write("mediaType", parcel.Label.MediaType);
+                Write("size", parcel.Label.Size);
 
-            foreach (var feature in parcel.Label.Feature)
-            {
-                if (feature.Value.Any())
+                if (parcel.Label.Annotations.Any())
                 {
-                    WriteTableStart("parcel.label.feature." + feature.Key);
-                    foreach (var kvp in feature.Value)
+                    WriteTableStart("parcel.label.annotations");
+                    foreach (var kvp in parcel.Label.Annotations)
                     {
                         Write(kvp.Key, kvp.Value);
+                    }
+                }
+
+                foreach (var feature in parcel.Label.Feature)
+                {
+                    if (feature.Value.Any())
+                    {
+                        WriteTableStart("parcel.label.feature." + feature.Key);
+                        foreach (var kvp in feature.Value)
+                        {
+                            Write(kvp.Key, kvp.Value);
+                        }
                     }
                 }
             }

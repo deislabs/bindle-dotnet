@@ -56,51 +56,54 @@ public class Integration : IClassFixture<IntegrationFixture>
     public async Task CanCreateInvoices()
     {
         var client = new BindleClient(DEMO_SERVER_URL);
-        var invoice = new Invoice(
-            bindleVersion: "1.0.0",
-            yanked: false,
-            bindle: new BindleMetadata(
-                name: "bernards/abominable/bindle",
-                version: "0.0.1",
-                description: "an abominable bindle",
-                authors: new[] { "some chap named Bernard" }
-            ),
-            annotations: new Dictionary<string, string> {
+        var invoice = new Invoice
+        {
+            BindleVersion = "1.0.0",
+            Bindle = new BindleMetadata
+            {
+                Name = "bernards/abominable/bindle",
+                Version = "0.0.1",
+                Description = "an abominable bindle",
+                Authors = new[] { "some chap named Bernard" }
+            },
+            Annotations = new Dictionary<string, string> {
                     { "penguinType", "adelie" }
             },
-            parcels: new[] {
-                    new Parcel(
-                        label: new Label(
-                            name: "gary",
-                            sha256: "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6",
-                            mediaType: "text/plain",
-                            size: 15,
-                            annotations: new Dictionary<string, string>(),
-                            feature: new Dictionary<string, IDictionary<string, string>>()
-                        ),
-                        conditions: null
-                    ),
-                    new Parcel(
-                        label: new Label(
-                            name: "keith",
-                            sha256: "45678",
-                            mediaType: "text/plain",
-                            size: 20,
-                            annotations: new Dictionary<string, string>(),
-                            feature: new Dictionary<string, IDictionary<string, string>> {
+            Parcels = new[] {
+                    new Parcel
+                    {
+                        Label = new Label
+                        {
+                            Name = "gary",
+                            Sha256 = "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6",
+                            MediaType = "text/plain",
+                            Size = 15,
+                            Annotations = new Dictionary<string, string>(),
+                            Feature = new Dictionary<string, IDictionary<string, string>>()
+                        }
+                    },
+                    new Parcel
+                    {
+                        Label = new Label
+                        {
+                            Name = "keith",
+                            Sha256 = "45678",
+                            MediaType = "text/plain",
+                            Size = 20,
+                            Annotations = new Dictionary<string, string>(),
+                            Feature = new Dictionary<string, IDictionary<string, string>> {
                                 { "test", new Dictionary<string, string> {
                                     { "a", "1" },
                                     { "b", "2" },
                                 }}
                             }
-                        ),
-                        conditions: null
-                    ),
+                        },
+                    },
             },
-            groups: new[] {
-                    new Group(name: "group1", required: true, satisfiedBy: SatisfiedBy.AllOf)
+            Groups = new[] {
+                new Group{Name = "group1", Required = true, SatisfiedBy = SatisfiedBy.AllOf}
             }
-        );
+        };
         var createResult = await client.CreateInvoice(invoice);
         Assert.Equal(1, createResult.MissingParcels.Count);
         var fetched = await client.GetInvoice("bernards/abominable/bindle/0.0.1");
