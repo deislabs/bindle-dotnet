@@ -64,48 +64,48 @@ public class Integration : IClassFixture<IntegrationFixture>
                 Name = "bernards/abominable/bindle",
                 Version = "0.0.1",
                 Description = "an abominable bindle",
-                Authors = new[] { "some chap named Bernard" }
+                Authors = new List<string> { "some chap named Bernard" }
             },
-            Annotations = new Dictionary<string, string> {
-                    { "penguinType", "adelie" }
+            Annotations = new Dictionary<string, string>
+            {
+                { "penguinType", "adelie" }
             },
-            Parcels = new[] {
-                    new Parcel
+            Parcels = new List<Parcel>
+            {
+                new Parcel
+                {
+                    Label = new Label
                     {
-                        Label = new Label
-                        {
-                            Name = "gary",
-                            Sha256 = "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6",
-                            MediaType = "text/plain",
-                            Size = 15,
-                            Annotations = new Dictionary<string, string>(),
-                            Feature = new Dictionary<string, IDictionary<string, string>>()
+                        Name = "gary",
+                        Sha256 = "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6",
+                        MediaType = "text/plain",
+                        Size = 15,
+                    }
+                },
+                new Parcel
+                {
+                    Label = new Label
+                    {
+                        Name = "keith",
+                        Sha256 = "45678",
+                        MediaType = "text/plain",
+                        Size = 20,
+                        Feature = new Dictionary<string, Dictionary<string, string>> {
+                            { "test", new Dictionary<string, string> {
+                                { "a", "1" },
+                                { "b", "2" },
+                            }}
                         }
                     },
-                    new Parcel
-                    {
-                        Label = new Label
-                        {
-                            Name = "keith",
-                            Sha256 = "45678",
-                            MediaType = "text/plain",
-                            Size = 20,
-                            Annotations = new Dictionary<string, string>(),
-                            Feature = new Dictionary<string, IDictionary<string, string>> {
-                                { "test", new Dictionary<string, string> {
-                                    { "a", "1" },
-                                    { "b", "2" },
-                                }}
-                            }
-                        },
-                    },
+                },
             },
-            Groups = new[] {
+            Groups = new List<Group>
+            {
                 new Group{Name = "group1", Required = true, SatisfiedBy = SatisfiedBy.AllOf}
             }
         };
         var createResult = await client.CreateInvoice(invoice);
-        Assert.Equal(1, createResult.MissingParcels.Count);
+        Assert.Single(createResult.MissingParcels);
         var fetched = await client.GetInvoice("bernards/abominable/bindle/0.0.1");
         Assert.Equal(invoice.Annotations["penguinType"], fetched.Annotations["penguinType"]);
         Assert.Equal(invoice.Parcels.Count, fetched.Parcels.Count);
