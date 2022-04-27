@@ -38,8 +38,8 @@ public class Integration : IClassFixture<IntegrationFixture>
     public async Task CanQueryInvoices()
     {
         var client = new BindleClient(DEMO_SERVER_URL);
-        var invoices = await client.QueryInvoices(queryString: "my");
-        Assert.True(invoices.All(i => i.Bindle.Name.Contains("my")));
+        var matches = await client.QueryInvoices(queryString: "my");
+        Assert.True(matches.Invoices.All(i => i.Bindle.Name.Contains("my")));
     }
 
     [Fact]
@@ -61,14 +61,14 @@ public class Integration : IClassFixture<IntegrationFixture>
             BindleVersion = "1.0.0",
             Bindle = new BindleMetadata
             {
-                Name = "bernards/abominable/bindle",
-                Version = "0.0.1",
-                Description = "an abominable bindle",
-                Authors = new List<string> { "some chap named Bernard" }
+                Name = "enterprise.com/warpcore",
+                Version = "1.0.0",
+                Description = "Warp core components",
+                Authors = new List<string> { "Geordi La Forge <mycoolvisor@ufp.com>" }
             },
             Annotations = new Dictionary<string, string>
             {
-                { "penguinType", "adelie" }
+                { "engineering_location", "main" }
             },
             Parcels = new List<Parcel>
             {
@@ -76,36 +76,16 @@ public class Integration : IClassFixture<IntegrationFixture>
                 {
                     Label = new Label
                     {
-                        Name = "gary",
-                        Sha256 = "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6",
+                        Name = "isolinear_chip.txt",
+                        Sha256 = "23f310b54076878fd4c36f0c60ec92011a8b406349b98dd37d08577d17397de5",
                         MediaType = "text/plain",
-                        Size = 15,
-                    }
-                },
-                new Parcel
-                {
-                    Label = new Label
-                    {
-                        Name = "keith",
-                        Sha256 = "45678",
-                        MediaType = "text/plain",
-                        Size = 20,
-                        Feature = new Dictionary<string, Dictionary<string, string>> {
-                            { "test", new Dictionary<string, string> {
-                                { "a", "1" },
-                                { "b", "2" },
-                            }}
-                        }
+                        Size = 9,
                     },
                 },
-            },
-            Groups = new List<Group>
-            {
-                new Group{Name = "group1", Required = true, SatisfiedBy = SatisfiedBy.AllOf}
             }
         };
         var createResult = await client.CreateInvoice(invoice);
-        Assert.Single(createResult.MissingParcels);
+        Assert.Single(createResult.Missing);
         var fetched = await client.GetInvoice("bernards/abominable/bindle/0.0.1");
         Assert.Equal(invoice.Annotations["penguinType"], fetched.Annotations["penguinType"]);
         Assert.Equal(invoice.Parcels.Count, fetched.Parcels.Count);
@@ -149,8 +129,8 @@ public class Integration : IClassFixture<IntegrationFixture>
     public async Task CanListMissingParcels()
     {
         var client = new BindleClient(DEMO_SERVER_URL);
-        var missing = await client.ListMissingParcels("mybindle/0.3.0");
-        Assert.Contains(missing, (label) => label.Sha256 == "e1706ab0a39ac88094b6d54a3f5cdba41fe5a901");
-        Assert.DoesNotContain(missing, (label) => label.Sha256 == "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
+        var resp = await client.ListMissingParcels("mybindle/0.3.0");
+        Assert.Contains(resp.Missing, (label) => label.Sha256 == "e1706ab0a39ac88094b6d54a3f5cdba41fe5a901");
+        Assert.DoesNotContain(resp.Missing, (label) => label.Sha256 == "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
     }
 }

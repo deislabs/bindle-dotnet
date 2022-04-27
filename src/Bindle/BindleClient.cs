@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Tomlyn;
 using Tomlyn.Syntax;
@@ -42,7 +43,7 @@ public class BindleClient
         var query = GetInvoiceQueryString(options);
         var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}{query}");
         var response = await _httpClient.GetAsync(uri);
-        ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
+        await ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
         {
@@ -65,7 +66,7 @@ public class BindleClient
         return syntax.ToModel<Invoice>(tomlOptions);
     }
 
-    public async Task<List<Invoice>> QueryInvoices(string? queryString = null,
+    public async Task<Matches> QueryInvoices(string? queryString = null,
         ulong? offset = null,
         long? limit = null,
         bool? strict = null,
@@ -75,7 +76,7 @@ public class BindleClient
         var query = GetDistinctInvoicesNamesQueryString(queryString, offset, limit, strict, semVer, yanked);
         var uri = new Uri(_baseUri, $"{QUERY_PATH}?{query}");
         var response = await _httpClient.GetAsync(uri);
-        ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
+        await ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
         {
@@ -88,21 +89,20 @@ public class BindleClient
         {
             ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
         };
-        return syntax.ToModel<List<Invoice>>(tomlOptions);
+        return syntax.ToModel<Matches>(tomlOptions);
     }
 
     public async Task<CreateInvoiceResult> CreateInvoice(Invoice invoice)
     {
-        var invoiceToml = InvoiceWriter.Write(invoice);
+        var invoiceToml = Toml.FromModel(invoice, new TomlModelOptions()
+        {
+            ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
+        });
 
         var uri = new Uri(_baseUri, INVOICE_PATH);
         var requestContent = new StringContent(invoiceToml, null, "application/toml");
-        if (requestContent.Headers.ContentType != null)
-        {
-            requestContent.Headers.ContentType.CharSet = null;  // The Bindle server is VERY strict about the contents of the Content-Type header
-        }
         var response = await _httpClient.PostAsync(uri, requestContent);
-        ExpectResponseCode(response, HttpStatusCode.Created, HttpStatusCode.Accepted);
+        await ExpectResponseCode(response, HttpStatusCode.Created, HttpStatusCode.Accepted);
 
         var content = await response.Content.ReadAsStringAsync();
         var syntax = GetTomlSyntax(content);
@@ -117,14 +117,14 @@ public class BindleClient
     {
         var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}");
         var response = await _httpClient.DeleteAsync(uri);
-        ExpectResponseCode(response, HttpStatusCode.OK);
+        await ExpectResponseCode(response, HttpStatusCode.OK);
     }
 
     public async Task<HttpContent> GetParcel(string invoiceId, string parcelId)
     {
         var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
         var response = await _httpClient.GetAsync(uri);
-        ExpectResponseCode(response, HttpStatusCode.OK);
+        await ExpectResponseCode(response, HttpStatusCode.OK);
 
         return response.Content;
     }
@@ -148,14 +148,14 @@ public class BindleClient
     {
         var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
         var response = await _httpClient.PostAsync(uri, content);
-        ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Created);
+        await ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Created);
     }
 
-    public async Task<IEnumerable<Label>> ListMissingParcels(string invoiceId)
+    public async Task<MissingParcelsResponse> ListMissingParcels(string invoiceId)
     {
         var uri = new Uri(_baseUri, $"{RELATIONSHIP_PATH}/missing/{invoiceId}");
         var response = await _httpClient.GetAsync(uri);
-        ExpectResponseCode(response, HttpStatusCode.OK);
+        await ExpectResponseCode(response, HttpStatusCode.OK);
 
         var content = await response.Content.ReadAsStringAsync();
         var syntax = GetTomlSyntax(content);
@@ -163,7 +163,7 @@ public class BindleClient
         {
             ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
         };
-        return syntax.ToModel<List<Label>>(tomlOptions);
+        return syntax.ToModel<MissingParcelsResponse>(tomlOptions);
     }
 
     private static string SlashSafe(string uri)
@@ -175,13 +175,13 @@ public class BindleClient
         return uri + '/';
     }
 
-    private static void ExpectResponseCode(HttpResponseMessage response, params HttpStatusCode[] codes)
+    private async static Task ExpectResponseCode(HttpResponseMessage response, params HttpStatusCode[] codes)
     {
         _ = response ?? throw new NoResponseException();
 
         if (!codes.Contains(response.StatusCode))
         {
-            throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}", response);
+            throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}: {await response.Content.ReadAsStringAsync()}", response);
         }
     }
 

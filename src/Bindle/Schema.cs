@@ -84,18 +84,29 @@ public class Group
 {
     public string? Name { get; set; }
     public bool Required { get; set; }
-    public SatisfiedBy SatisfiedBy { get; set; }
-}
-
-public enum SatisfiedBy
-{
-    AllOf,
-    OneOf,
-    Optional,
+    public string? SatisfiedBy { get; set; }
 }
 
 public class CreateInvoiceResult
 {
     public Invoice Invoice { get; set; } = new Invoice { };
-    public List<Label> MissingParcels { get; set; } = new List<Label>();
+    public List<Label> Missing { get; set; } = new List<Label>();
+}
+
+/// Describes the matches that are returned from a query
+public class Matches
+{
+    public string? Query { get; set; }
+    public bool Strict { get; set; }
+    public long Offset { get; set; }
+    public long Limit { get; set; }
+    public long Total { get; set; }
+    public bool More { get; set; }
+    public bool Yanked { get; set; }
+    public List<Invoice> Invoices { get; set; } = new List<Invoice>();
+}
+
+public class MissingParcelsResponse
+{
+    public List<Label> Missing { get; set; } = new List<Label>();
 }
