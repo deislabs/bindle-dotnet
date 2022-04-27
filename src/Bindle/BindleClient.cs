@@ -53,7 +53,7 @@ public class BindleClient
             }
             else
             {
-                throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}", response);
+                throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}: {await response.Content.ReadAsStringAsync()}", response);
             }
         }
 
@@ -80,7 +80,7 @@ public class BindleClient
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
         {
-            throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}", response);
+            throw new BindleProtocolException($"Bindle server returned status code {response.StatusCode}: {await response.Content.ReadAsStringAsync()}", response);
         }
 
         var content = await response.Content.ReadAsStringAsync();
