@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Deislabs.Bindle;
 
@@ -11,7 +12,17 @@ public class Invoice
     public bool Yanked { get; set; }
     public BindleMetadata? Bindle { get; set; }
     public IDictionary<string, string> Annotations { get; set; } = new Dictionary<string, string>();
+
+    // TODO(bacongobbler): upstream naming bug?
+    [DataMember(Name = "signature")]
+    public IList<Signature> Signatures { get; set; } = new List<Signature>();
+
+    // TODO(bacongobbler): upstream naming bug?
+    [DataMember(Name = "parcel")]
     public IList<Parcel> Parcels { get; set; } = new List<Parcel>();
+
+    // TODO(bacongobbler): upstream naming bug?
+    [DataMember(Name = "group")]
     public IList<Group> Groups { get; set; } = new List<Group>();
 }
 
@@ -23,10 +34,34 @@ public class BindleMetadata
     public IList<string> Authors { get; set; } = new List<string>();
 }
 
+public class Signature
+{
+    [DataMember(Name = "signature")]
+    public string? Sig { get; set; }
+    public string? By { get; set; }
+    public string? Key { get; set; }
+    public string? Role { get; set; }
+    public long At { get; set; }
+}
+
+public class SignatureKey
+{
+    public string? Label { get; set; }
+    public IList<string> Roles { get; set; } = new List<string>();
+    public string? Key { get; set; }
+    public string? LabelSignature { get; set; }
+}
+
+public class Keyring
+{
+    public string? Version { get; set; }
+    public IList<SignatureKey> Key { get; set; } = new List<SignatureKey>();
+}
+
 public class Parcel
 {
     public Label? Label { get; set; }
-    public Conditions? Conditions { get; set; }
+    public Condition? Conditions { get; set; }
 }
 
 public class Label
@@ -39,7 +74,7 @@ public class Label
     public IDictionary<string, IDictionary<string, string>> Feature { get; set; } = new Dictionary<string, IDictionary<string, string>>();
 }
 
-public class Conditions
+public class Condition
 {
     public IList<string> MemberOf { get; set; } = new List<string>();
     public IList<string> Requires { get; set; } = new List<string>();
