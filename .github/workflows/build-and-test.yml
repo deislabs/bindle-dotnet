@@ -1,0 +1,63 @@
+name: Build and test application
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [linux-debug, linux-release, macos-debug, macos-release, windows-debug, windows-release]
+        include:
+          - build: linux-debug
+            os: ubuntu-latest
+            config: debug
+          - build: linux-release
+            os: ubuntu-latest
+            config: release
+          - build: macos-debug
+            os: macos-latest
+            config: debug
+          - build: macos-release
+            os: macos-latest
+            config: release
+          - build: windows-debug
+            os: windows-latest
+            config: debug
+          - build: windows-release
+            os: windows-latest
+            config: release
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get Bindle source for testing
+      uses: actions/checkout@v2
+      with:
+        repository: deislabs/bindle
+        path: bindleserver
+        ref: v0.8.0
+    - name: Build Bindle
+      run: make build
+      working-directory: bindleserver
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Set MINVERBUILDMETADATA
+      run: echo MINVERBUILDMETADATA=$(git rev-parse --short ${GITHUB_SHA})  >> $GITHUB_ENV
+    - name: Build
+      run: dotnet build  -c ${{ matrix.config }} --no-restore
+    - name: Test
+      env:
+        BINDLE_SERVER_PATH: ../../../../../bindleserver/target/debug
+      run: dotnet test -c ${{ matrix.config }} --no-build --verbosity normal
