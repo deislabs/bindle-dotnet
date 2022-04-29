@@ -1,0 +1,29 @@
+name: Create GitHub release
+
+on:
+  push:
+    tags:
+    - '[0-9]+.[0-9]+.[0-9]+'
+    - '[0-9]+.[0-9]+.[0-9]+-preview'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: "Build Changelog"
+      id: github_release
+      uses: mikepenz/release-changelog-builder-action@main
+      with:
+        configuration: ".github/workflows/configuration.json"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        body: ${{ steps.github_release.outputs.changelog }}
+        prerelease: ${{ contains(github.ref, '-preview') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
