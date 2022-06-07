@@ -20,7 +20,6 @@ public class BindleClient
     {
         ConnectionInfo connectionInfo = new ConnectionInfo(connectionString);
 
-        // TODO: do we want to assume the default listening address?
         if (string.IsNullOrEmpty(connectionInfo.BaseUri))
             throw new ArgumentException("base URI cannot be empty");
 

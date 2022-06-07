@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Deislabs.Bindle;
 
 public class ConnectionInfo
 {
+    private readonly Dictionary<string, string> keyValuePairs;
+
     static readonly string[] serverAliases = {
         "server",
         "host",
@@ -26,11 +29,13 @@ public class ConnectionInfo
 
     public ConnectionInfo(string connectionString)
     {
-        BaseUri = GetValue(connectionString, serverAliases);
+        keyValuePairs = GetKeyValuePairs(connectionString);
+
+        BaseUri = GetValue(serverAliases);
 
         try
         {
-            SslMode = Enum.Parse<SslMode>(GetValue(connectionString, sslModeAliases), true);
+            SslMode = Enum.Parse<SslMode>(GetValue(sslModeAliases), true);
         }
         catch (Exception)
         {
@@ -38,14 +43,18 @@ public class ConnectionInfo
         }
     }
 
-    static string GetValue(string connectionString, params string[] keyAliases)
+    private Dictionary<string, string> GetKeyValuePairs(string connectionString)
     {
-        var keyValuePairs = connectionString.Split(';')
-                                            .Where(kvp => kvp.Contains('='))
-                                            .Select(kvp => kvp.Split(new char[] { '=' }, 2))
-                                            .ToDictionary(kvp => kvp[0].Trim(),
-                                                        kvp => kvp[1].Trim(),
-                                                        StringComparer.InvariantCultureIgnoreCase);
+        return connectionString.Split(';')
+            .Where(kvp => kvp.Contains('='))
+            .Select(kvp => kvp.Split(new char[] { '=' }, 2))
+            .ToDictionary(kvp => kvp[0].Trim(),
+                          kvp => kvp[1].Trim(),
+                          StringComparer.InvariantCultureIgnoreCase);
+    }
+
+    private string GetValue(string[] keyAliases)
+    {
         foreach (var alias in keyAliases)
         {
             string? value;
