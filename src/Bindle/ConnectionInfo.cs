@@ -30,7 +30,7 @@ public class ConnectionInfo
 
         try
         {
-            SslMode = Enum.Parse<SslMode>(GetValue(connectionString, sslModeAliases));
+            SslMode = Enum.Parse<SslMode>(GetValue(connectionString, sslModeAliases), true);
         }
         catch (Exception)
         {
