@@ -6,8 +6,6 @@ namespace Deislabs.Bindle;
 
 public class ConnectionInfo
 {
-    private readonly Dictionary<string, string> keyValuePairs;
-
     static readonly string[] serverAliases = {
         "server",
         "host",
@@ -23,9 +21,17 @@ public class ConnectionInfo
         "ssl mode"
     };
 
+    private readonly Dictionary<string, string> keyValuePairs;
+
     public string BaseUri;
 
     public SslMode? SslMode;
+
+    public ConnectionInfo()
+    {
+        keyValuePairs = new Dictionary<string, string>();
+        BaseUri = "http://localhost:8080/v1/";
+    }
 
     public ConnectionInfo(string connectionString)
     {

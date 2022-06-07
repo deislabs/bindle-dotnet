@@ -14,12 +14,10 @@ namespace Deislabs.Bindle;
 
 public class BindleClient
 {
-    public BindleClient(
-        string connectionString
-    )
-    {
-        ConnectionInfo connectionInfo = new ConnectionInfo(connectionString);
+    public BindleClient(string connectionString) : this(new ConnectionInfo(connectionString)) { }
 
+    public BindleClient(ConnectionInfo connectionInfo)
+    {
         if (string.IsNullOrEmpty(connectionInfo.BaseUri))
             throw new ArgumentException("base URI cannot be empty");
 
