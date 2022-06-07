@@ -15,34 +15,38 @@ namespace Deislabs.Bindle;
 public class BindleClient
 {
     public BindleClient(
-        string baseUri
+        string connectionString
     )
     {
-        _baseUri = new Uri(SlashSafe(baseUri));
-        _httpClient = new HttpClient();
-    }
+        ConnectionInfo connectionInfo = new ConnectionInfo(connectionString);
 
-    public BindleClient(
-        string baseUri,
-        HttpMessageHandler messageHandler
-    )
-    {
-        _baseUri = new Uri(SlashSafe(baseUri));
-        _httpClient = new HttpClient(messageHandler);
+        // TODO: do we want to assume the default listening address?
+        if (string.IsNullOrEmpty(connectionInfo.BaseUri))
+            throw new ArgumentException("base URI cannot be empty");
+
+        var handler = new HttpClientHandler();
+
+        if (connectionInfo.SslMode == SslMode.Disable)
+        {
+            handler.ServerCertificateCustomValidationCallback =
+                (httpRequestMessage, cert, cetChain, policyErrors) =>
+            {
+                return true;
+            };
+        }
+
+        _httpClient = new HttpClient(handler) { BaseAddress = new Uri(SlashSafe(connectionInfo.BaseUri)) };
     }
 
     private const string INVOICE_PATH = "_i";
     private const string QUERY_PATH = "_q";
     private const string RELATIONSHIP_PATH = "_r";
-
-    private readonly Uri _baseUri;
     private readonly HttpClient _httpClient;
 
     public async Task<Invoice> GetInvoice(string invoiceId, GetInvoiceOptions options = GetInvoiceOptions.None)
     {
         var query = GetInvoiceQueryString(options);
-        var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}{query}");
-        var response = await _httpClient.GetAsync(uri);
+        var response = await _httpClient.GetAsync($"{INVOICE_PATH}/{invoiceId}{query}");
         await ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
@@ -74,8 +78,7 @@ public class BindleClient
         bool? yanked = null)
     {
         var query = GetDistinctInvoicesNamesQueryString(queryString, offset, limit, strict, semVer, yanked);
-        var uri = new Uri(_baseUri, $"{QUERY_PATH}?{query}");
-        var response = await _httpClient.GetAsync(uri);
+        var response = await _httpClient.GetAsync($"{QUERY_PATH}?{query}");
         await ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Forbidden);
 
         if (response.StatusCode == HttpStatusCode.Forbidden)
@@ -99,9 +102,8 @@ public class BindleClient
             ConvertPropertyName = name => TomlNamingHelper.PascalToCamelCase(name)
         });
 
-        var uri = new Uri(_baseUri, INVOICE_PATH);
         var requestContent = new StringContent(invoiceToml, null, "application/toml");
-        var response = await _httpClient.PostAsync(uri, requestContent);
+        var response = await _httpClient.PostAsync(INVOICE_PATH, requestContent);
         await ExpectResponseCode(response, HttpStatusCode.Created, HttpStatusCode.Accepted);
 
         var content = await response.Content.ReadAsStringAsync();
@@ -115,15 +117,13 @@ public class BindleClient
 
     public async Task YankInvoice(string invoiceId)
     {
-        var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}");
-        var response = await _httpClient.DeleteAsync(uri);
+        var response = await _httpClient.DeleteAsync($"{INVOICE_PATH}/{invoiceId}");
         await ExpectResponseCode(response, HttpStatusCode.OK);
     }
 
     public async Task<HttpContent> GetParcel(string invoiceId, string parcelId)
     {
-        var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
-        var response = await _httpClient.GetAsync(uri);
+        var response = await _httpClient.GetAsync($"{INVOICE_PATH}/{invoiceId}@{parcelId}");
         await ExpectResponseCode(response, HttpStatusCode.OK);
 
         return response.Content;
@@ -146,15 +146,13 @@ public class BindleClient
 
     public async Task CreateParcel(string invoiceId, string parcelId, HttpContent content)
     {
-        var uri = new Uri(_baseUri, $"{INVOICE_PATH}/{invoiceId}@{parcelId}");
-        var response = await _httpClient.PostAsync(uri, content);
+        var response = await _httpClient.PostAsync($"{INVOICE_PATH}/{invoiceId}@{parcelId}", content);
         await ExpectResponseCode(response, HttpStatusCode.OK, HttpStatusCode.Created);
     }
 
     public async Task<MissingParcelsResponse> ListMissingParcels(string invoiceId)
     {
-        var uri = new Uri(_baseUri, $"{RELATIONSHIP_PATH}/missing/{invoiceId}");
-        var response = await _httpClient.GetAsync(uri);
+        var response = await _httpClient.GetAsync($"{RELATIONSHIP_PATH}/missing/{invoiceId}");
         await ExpectResponseCode(response, HttpStatusCode.OK);
 
         var content = await response.Content.ReadAsStringAsync();
