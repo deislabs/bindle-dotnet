@@ -23,7 +23,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanFetchInvoice()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         var invoice = await client.GetInvoice("your/fancy/bindle/0.3.0");
         Assert.Equal("1.0.0", invoice.BindleVersion);
         Assert.Equal("your/fancy/bindle", invoice.Bindle.Name);
@@ -37,7 +37,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanQueryInvoices()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         var matches = await client.QueryInvoices(queryString: "my");
         Assert.True(matches.Invoices.All(i => i.Bindle.Name.Contains("my")));
     }
@@ -45,7 +45,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanFetchYankedInvoices()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         var invoice = await client.GetInvoice("yourbindle/0.1.1", IncludeYanked);
         Assert.Equal("1.0.0", invoice.BindleVersion);
         Assert.Equal("yourbindle", invoice.Bindle.Name);
@@ -55,7 +55,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanCreateInvoices()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         var invoice = new Invoice
         {
             BindleVersion = "1.0.0",
@@ -98,7 +98,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [TestPriority(10)]
     public async Task CanYankInvoice()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         await client.YankInvoice("your/fancy/bindle/0.3.0");
         await Assert.ThrowsAsync<BindleYankedException>(async () =>
         {
@@ -111,7 +111,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanFetchParcel()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         var parcel = await client.GetParcel("mybindle/0.1.0", "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
         Assert.Equal("Fie on you Gary", await parcel.ReadAsStringAsync());
     }
@@ -119,7 +119,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanCreateParcel()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         await client.CreateParcel("mybindle/0.1.0", "460d5965e4d1909e8c7a3748a414956b7038ab5fd79937c9fcb2b214e6b0160a", "The front fell off");
         var fetched = await client.GetParcel("mybindle/0.1.0", "460d5965e4d1909e8c7a3748a414956b7038ab5fd79937c9fcb2b214e6b0160a");
         Assert.Equal("The front fell off", await fetched.ReadAsStringAsync());
@@ -128,7 +128,7 @@ public class Integration : IClassFixture<IntegrationFixture>
     [Fact]
     public async Task CanListMissingParcels()
     {
-        var client = new BindleClient($"host=${DEMO_SERVER_URL}");
+        var client = new BindleClient($"host={DEMO_SERVER_URL}");
         var resp = await client.ListMissingParcels("mybindle/0.3.0");
         Assert.Contains(resp.Missing, (label) => label.Sha256 == "e1706ab0a39ac88094b6d54a3f5cdba41fe5a901");
         Assert.DoesNotContain(resp.Missing, (label) => label.Sha256 == "f7f3b33707fb76d208f5839a40e770452dcf9f348bfd7faf2c524e0fa6710ed6");
