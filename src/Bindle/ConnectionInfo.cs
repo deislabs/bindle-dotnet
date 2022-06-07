@@ -20,7 +20,7 @@ public class ConnectionInfo
         "ssl mode"
     };
 
-    public string? BaseUri;
+    public string BaseUri;
 
     public SslMode? SslMode;
 
