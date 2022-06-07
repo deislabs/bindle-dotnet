@@ -31,6 +31,11 @@ public class BindleClient
         }
 
         _httpClient = new HttpClient(handler) { BaseAddress = new Uri(SlashSafe(connectionInfo.BaseUri)) };
+
+        if (!string.IsNullOrEmpty(connectionInfo.UserName) && !string.IsNullOrEmpty(connectionInfo.Password))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", $"{connectionInfo.UserName}:{connectionInfo.Password}");
+        }
     }
 
     private const string INVOICE_PATH = "_i";

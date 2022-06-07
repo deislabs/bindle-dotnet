@@ -36,6 +36,25 @@ public class ConnectionInfoTests
     }
 
     [Fact]
+    public void ShouldAcceptUserNameAliases()
+    {
+        Assert.Equal("", (new ConnectionInfo("").UserName));
+        Assert.Equal("", (new ConnectionInfo("username=").UserName));
+        Assert.Equal("spongebob", (new ConnectionInfo("username=spongebob").UserName));
+        Assert.Equal("patrick", (new ConnectionInfo("user=patrick").UserName));
+    }
+
+    [Fact]
+    public void ShouldAcceptPasswordAliases()
+    {
+        Assert.Equal("", (new ConnectionInfo("").Password));
+        Assert.Equal("", (new ConnectionInfo("password=").Password));
+        Assert.Equal("imagoofygooberyeah", (new ConnectionInfo("password=imagoofygooberyeah").Password));
+        Assert.Equal("uragoofygooberyeah", (new ConnectionInfo("pass=uragoofygooberyeah").Password));
+        Assert.Equal("wereallgoofygoobersyeah", (new ConnectionInfo("passwd=wereallgoofygoobersyeah").Password));
+    }
+
+    [Fact]
     public void ShouldAcceptMultipleOptions()
     {
         var connectionInfos = new ConnectionInfo[]

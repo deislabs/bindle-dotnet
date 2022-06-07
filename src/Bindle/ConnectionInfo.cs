@@ -21,9 +21,24 @@ public class ConnectionInfo
         "ssl mode"
     };
 
+    static readonly string[] usernameAliases = {
+        "user",
+        "username"
+    };
+
+    static readonly string[] passwordAliases = {
+        "pass",
+        "passwd",
+        "password"
+    };
+
     private readonly Dictionary<string, string> keyValuePairs;
 
     public string BaseUri;
+
+    public string UserName;
+
+    public string Password;
 
     public SslMode? SslMode;
 
@@ -31,6 +46,8 @@ public class ConnectionInfo
     {
         keyValuePairs = new Dictionary<string, string>();
         BaseUri = "http://localhost:8080/v1/";
+        UserName = String.Empty;
+        Password = String.Empty;
     }
 
     public ConnectionInfo(string connectionString)
@@ -38,6 +55,10 @@ public class ConnectionInfo
         keyValuePairs = GetKeyValuePairs(connectionString);
 
         BaseUri = GetValue(serverAliases);
+
+        UserName = GetValue(usernameAliases);
+
+        Password = GetValue(passwordAliases);
 
         try
         {
