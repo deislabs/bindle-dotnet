@@ -1,4 +1,3 @@
-using Deislabs.Bindle;
 using Xunit;
 
 namespace Deislabs.Bindle.UnitTests;
