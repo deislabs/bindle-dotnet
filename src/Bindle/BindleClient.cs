@@ -10,7 +10,7 @@ using Tomlyn.Syntax;
 
 namespace Deislabs.Bindle;
 
-public class BindleClient
+public class BindleClient: IBindleClient
 {
     public BindleClient(string connectionString) : this(new ConnectionInfo(connectionString)) { }
 
